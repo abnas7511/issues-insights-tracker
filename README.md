@@ -52,6 +52,7 @@ python -m venv .venv && source .venv/bin/activate  # or use your preferred metho
 pip install -r requirements.txt
 cp .env.example .env  # Edit DB/secret config as needed
 alembic upgrade head
+python scripts/init_db.py  # Insert demo users and data
 uvicorn app.main:app --reload
 ```
 - Start Celery worker (in another terminal):
@@ -80,9 +81,10 @@ npm run dev
    ```bash
    docker compose up --build
    ```
-2. Run DB migrations (in another terminal):
+2. Run DB migrations and seed demo data (in another terminal):
    ```bash
    docker compose exec backend alembic upgrade head
+   docker compose exec backend python scripts/init_db.py
    ```
 3. Access:
    - Frontend: http://localhost (or as mapped)
