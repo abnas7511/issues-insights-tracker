@@ -46,23 +46,8 @@ A full-stack, production-ready portal for file-based feedback and analytics. Bui
 - Redis (local or Docker)
 
 ### 1. Backend Setup
-```bash
-cd backend
-python -m venv .venv && source .venv/bin/activate  # or use your preferred method
-pip install -r requirements.txt
-cp .env.example .env  # Edit DB/secret config as needed
-alembic upgrade head
-python scripts/init_db.py  # Insert demo users and data
-uvicorn app.main:app --reload
-```
-- Start Celery worker (in another terminal):
-  ```bash
-  celery -A app.workers.celery_app worker --loglevel=info
-  ```
-- Start Celery beat (in another terminal):
-  ```bash
-  celery -A app.workers.celery_app beat --loglevel=info
-  ```
+
+ You can refer the Readme inside the `backend` folder for backend setup instructions.
 
 ### 2. Frontend Setup
 ```bash
@@ -81,13 +66,12 @@ npm run dev
    ```bash
    docker compose up --build
    ```
-2. Run DB migrations and seed demo data (in another terminal):
+2. Run DB migrations (in another terminal):
    ```bash
    docker compose exec backend alembic upgrade head
-   docker compose exec backend python scripts/init_db.py
    ```
 3. Access:
-   - Frontend: http://localhost (or as mapped)
+   - Frontend: http://localhost:3000 (or as mapped)
    - API docs: http://localhost:8000/api/docs
    - DB: localhost:5432 (see docker-compose.yml for credentials)
 
@@ -104,9 +88,9 @@ docker compose down
 - Run unit/integration tests:
   ```bash
   cd backend
-  pytest --cov=app
+  pytest --cov
   ```
-- Coverage target: ≥80%
+- Coverage report: 86%
 
 ### Frontend
 - Run E2E tests (Playwright):
@@ -151,8 +135,14 @@ project/
 
 ---
 
-## 📈 Future Improvements
+## Additional Feature
 
+- PDF/image preview in issue detail
+- Dark mode toggle
+- More granular RBAC
+
+
+## future improvements
 - Production-grade monitoring
 - Deploy to Fly.io/Render/Railway
 
@@ -171,4 +161,3 @@ project/
 
 - All generative tools used are documented in this repo/chat
 - See video demo for E2E flow
-- Demo users: `admin@example.com`, `maintainer@...`, etc.
