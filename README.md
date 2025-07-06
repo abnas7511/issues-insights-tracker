@@ -117,7 +117,7 @@ docker compose down
 - **WebSocket:** Simple, low-latency realtime.
 - **Celery:** Reliable background jobs.
 - **Testing:** High backend coverage, E2E happy path.
-- **Observability:** Structured logging, Prometheus/StatsD/OpenTelemetry (see code).
+- **Observability:** Structured logging.
 
 ---
 
@@ -139,12 +139,12 @@ project/
 
 - PDF/image preview in issue detail
 - Dark mode toggle
-- More granular RBAC
 
 
 ## future improvements
 - Production-grade monitoring
 - Deploy to Fly.io/Render/Railway
+- More granular RBAC
 
 ---
 
@@ -161,3 +161,4 @@ project/
 
 - All generative tools used are documented in this repo/chat
 - See video demo for E2E flow
+- You can check for Readmes inside frontend and backend to get more knowledge about APIS routes and all
