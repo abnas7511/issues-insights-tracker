@@ -1,0 +1,132 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15
+    container_name: issues_tracker_db
+    environment:
+      POSTGRES_DB: issues_tracker
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - issues_network
+
+      
+  # React + Vite Frontend
+  frontend:
+    build:
+      context: ./frontend
+    container_name: issues_tracker_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - issues_network
+
+
+  # Redis for Celery
+  redis:
+    image: redis:7-alpine
+    container_name: issues_tracker_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - issues_network
+
+  # FastAPI Backend
+  backend:
+    build: ./backend
+    container_name: issues_tracker_backend_api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:password@db:5432/issues_tracker
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: y4nl)ku-j5o5v%3=2$g@!)65yme+jpxx@7%&dazve3psfcha=^y
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend/uploads:/app/uploads
+    networks:
+      - issues_network
+    command: ["./start.sh"]
+    restart: unless-stopped
+
+  # Celery Worker
+  worker:
+    build: ./backend
+    container_name: issues_tracker_worker_cel
+    command: celery -A app.workers.celery_app worker --loglevel=info
+    environment:
+      DATABASE_URL: postgresql://postgres:password@db:5432/issues_tracker
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: y4nl)ku-j5o5v%3=2$g@!)65yme+jpxx@7%&dazve3psfcha=^y
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend/uploads:/app/uploads
+    networks:
+      - issues_network
+    restart: unless-stopped
+
+  # Celery Beat (Scheduler)
+  beat:
+    build: ./backend
+    container_name: issues_tracker_beat_cel
+    command: celery -A app.workers.celery_app beat --loglevel=info
+    environment:
+      DATABASE_URL: postgresql://postgres:password@db:5432/issues_tracker
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: y4nl)ku-j5o5v%3=2$g@!)65yme+jpxx@7%&dazve3psfcha=^y
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend/uploads:/app/uploads
+    networks:
+      - issues_network
+    restart: unless-stopped
+
+  # pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: issues_tracker_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - issues_network
+    restart: unless-stopped
+
+  # Nginx Server
+  nginx:
+    image: nginx:alpine
+    container_name: issues_tracker_nginx_server
+    ports:
+      - "80:80"
+    volumes:
+      - ./backend/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+    networks:
+      - issues_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  issues_network:
+    driver: bridge

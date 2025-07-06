@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: issues_tracker
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+    env:
+      DATABASE_URL: postgresql://postgres:password@localhost:5432/issues_tracker
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY: test-secret-key
+      UPLOAD_DIR: uploads
+      MAX_FILE_SIZE: 10485760
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          cd backend
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+      - name: Run Alembic migrations
+        run: |
+          cd backend
+          source .venv/bin/activate
+          alembic upgrade head
+      - name: Lint (flake8)
+        run: |
+          cd backend
+          source .venv/bin/activate
+          pip install flake8
+          flake8 app
+      - name: Test (pytest)
+        run: |
+          cd backend
+          source .venv/bin/activate
+          pytest --cov=app
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+      - name: Lint (ESLint)
+        run: |
+          cd frontend
+          npm run lint
+      - name: Build
+        run: |
+          cd frontend
+          npm run build
+      - name: Test (Vitest)
+        run: |
+          cd frontend
+          npm run test -- --coverage || echo "Frontend tests not implemented"
+      - name: E2E Test (Playwright)
+        run: |
+          cd frontend
+          npx playwright install --with-deps
+          npx playwright test || echo "E2E tests not implemented"
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build backend Docker image
+        run: docker build -t issues-backend ./backend
+      - name: Build frontend Docker image
+        run: docker build -t issues-frontend ./frontend

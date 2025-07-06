@@ -1,0 +1,47 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15
+    container_name: issues_tracker_db_dev
+    environment:
+      POSTGRES_DB: issues_tracker
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - issues_network_dev
+
+  # Redis for Celery
+  redis:
+    image: redis:7-alpine
+    container_name: issues_tracker_redis_dev
+    ports:
+      - "6379:6379"
+    networks:
+      - issues_network_dev
+
+  # pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: issues_tracker_pgadmin_dev
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - issues_network_dev
+    restart: unless-stopped
+
+volumes:
+  postgres_data_dev:
+
+networks:
+  issues_network_dev:
+    driver: bridge

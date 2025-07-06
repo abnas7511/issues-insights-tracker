@@ -1,0 +1,72 @@
+# Page snapshot
+
+```yaml
+- img
+- text: IIT
+- navigation:
+  - link "Dashboard":
+    - /url: /
+    - img
+    - text: Dashboard
+  - link "Issues":
+    - /url: /issues
+    - img
+    - text: Issues
+  - link "Create Issue":
+    - /url: /issues/new
+    - img
+    - text: Create Issue
+  - link "Analytics":
+    - /url: /analytics
+    - img
+    - text: Analytics
+  - link "Users":
+    - /url: /users
+    - img
+    - text: Users
+  - link "Settings":
+    - /url: /settings
+    - img
+    - text: Settings
+- img "Admin User"
+- paragraph: Admin User
+- paragraph: ADMIN
+- banner:
+  - heading "Create Issue" [level=1]
+  - button:
+    - img
+  - button "2":
+    - img
+    - text: "2"
+  - text: Admin User ADMIN
+  - img "Admin User"
+  - button:
+    - img
+- main:
+  - button "Back to Issues":
+    - img
+    - text: Back to Issues
+  - heading "Create New Issue" [level=1]
+  - paragraph: Report a bug, request a feature, or ask a question
+  - text: Title
+  - textbox
+  - text: Severity
+  - combobox:
+    - option "Select severity" [selected]
+    - option "Low"
+    - option "Medium"
+    - option "High"
+    - option "Critical"
+  - text: Description
+  - textbox "Describe the issue in detail. You can use Markdown formatting."
+  - text: Tags
+  - textbox "Add a tag"
+  - button "Add"
+  - text: File Attachments
+  - button "Choose File"
+  - img
+  - paragraph: Drag & drop files here, or click to select files
+  - paragraph: "Supports: Images, PDFs, Text files"
+  - button "Cancel"
+  - button "Create Issue"
+```
